@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>menu</title>
+    <link rel="stylesheet" href="../lib/layui-v2.5.4/css/layui.css" media="all">
+    <link rel="stylesheet" href="../css/public.css" media="all">
+    <style>
+        .layui-btn:not(.layui-btn-lg ):not(.layui-btn-sm):not(.layui-btn-xs) {
+            height: 34px;
+            line-height: 34px;
+            padding: 0 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="layuimini-container">
+    <div class="layuimini-main">
+        <div>
+            <div class="layui-btn-group">
+                <button class="layui-btn" id="btn-expand">全部展开</button>
+                <button class="layui-btn" id="btn-fold">全部折叠</button>
+<!--                <button class="layui-btn" id="dlfile">下载文件</button>-->
+                <button class="layui-btn" id="dlform">下载文件form</button>
+
+<!--                <a href="../DLFiles/测试文档.docx" class="layui-btn" id="DL">下载docx</a>-->
+            </div>
+            <table id="munu-table" class="layui-table" lay-filter="munu-table"></table>
+        </div>
+    </div>
+</div>
+<!-- 操作列 -->
+<script type="text/html" id="auth-state">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="edit">修改</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+
+<script src="../lib/layui-v2.5.4/layui.js" charset="utf-8"></script>
+<script src="../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script>
+    layui.use(['table', 'treetable'], function () {
+        var $ = layui.jquery;
+        var table = layui.table;
+        var treetable = layui.treetable;
+        var appRoot = "http://127.0.0.1:8080/";
+
+        //https://blog.csdn.net/weixin_39514326/article/details/88035194
+        $("#dlform").click(function () {
+            var url=appRoot+'demo1/dlfile/';   //请求的URl
+            var xhr = new XMLHttpRequest();		//定义http请求对象
+            xhr.open("POST", url, true);
+            xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+            //xhr.send("userId="+username+"&password="+password+"&repo_type="+type+"&repo_time=");
+            xhr.send();
+            xhr.responseType = "blob";  // 返回类型blob
+            xhr.onload = function() {   // 定义请求完成的处理函数，请求前也可以增加加载框/禁用下载按钮逻辑
+                if (this.status===200) {
+                    var blob = this.response;
+                    var reader = new FileReader();
+                    reader.readAsDataURL(blob);  // 转换为base64，可以直接放入a表签href
+                    reader.onload=function (e) {
+                        console.log(e);			//查看有没有接收到数据流
+                        // 转换完成，创建一个a标签用于下载
+                        var a = document.createElement('a');
+						a.download="data_repo"+".docx";			//自定义下载文件名称
+                        a.href = e.target.result;
+                        $("body").append(a);    // 修复firefox中无法触发click
+                        a.click();
+                        $(a).remove();
+                    }
+                }
+                else{
+                    alert("出现了未知的错误!");
+                }
+            }
+
+            // $.ajax({
+            //     url:appRoot + "demo1/dlfile/",
+            //     type:"post",
+            //     responseType:"blob",
+            //     success:function (data) {
+            //     console.log(data)
+            // }
+            // });
+
+
+            // var xmlResquest = new XMLHttpRequest();
+            // //  发起请求
+            // xmlResquest.open("POST", appRoot + "demo1/dlfile/", true);
+            // // 设置请求头类型
+            // xmlResquest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            // //xmlResquest.setRequestHeader("id",data.id);
+            // xmlResquest.responseType = "blob";
+            // //  返回
+            // xmlResquest.onload = function(oEvent) {
+            //     console.log(oEvent)
+            //     //alert(this.status);
+            //     var content = xmlResquest.response;
+            //     // 组装a标签
+            //     var elink = document.createElement("a");
+            //
+            //     //获取文件格式,截取文件后缀
+            //     var fileaddr = data.fileAddress;
+            //     var index = fileaddr.lastIndexOf(".");
+            //     var length  =fileaddr.length;
+            //     var laterName = fileaddr.substring(index,length);
+            //     //拼接下载的文件名
+            //     var newFileName = data.fileName+laterName;
+            //     //设置文件下载路径
+            //     elink.download = newFileName;
+            //     elink.style.display = "none";
+            //     var blob = new Blob([content]);
+            //
+            //     //解决下载不存在文件的问题，根据blob大小判断
+            //     if(blob.size==0){
+            //         layer.msg('服务器没找到此文件，请联系管理员!');
+            //     }else{
+            //         elink.href = URL.createObjectURL(blob);
+            //         document.body.appendChild(elink);
+            //         elink.click();
+            //         document.body.removeChild(elink);
+            //     }
+            // };
+            // xmlResquest.send();
+
+
+            // })
+
+            // $("#dlform").click(
+            //     $.ajax(
+            //         url:"127.0.0.1:8080/demo1/dlfile/",
+            //         type:"post",
+            //         data:{"data1":"hello"},
+            //     success:function (data) {
+            //         console.log(data)
+            //     })
+            // )        
+            // var postDownLoadFile = function (options) {
+            //     var config = $.extend(true, {method: 'post'}, options);
+            //     var $iframe = $('<iframe id="down-file-iframe" />');
+            //     var $form = $('<form target="down-file-iframe" method="' + config.method + '" />');
+            //     $form.attr('action', config.url);
+            //     for (var key in config.data) {
+            //         $form.append('<input type="hidden" name="' + key + '" value="' + config.data[key] + '" />');
+            //     }
+            //     $iframe.append($form);
+            //     $(document.body).append($iframe);
+            //     $form[0].submit();
+            //     $iframe.remove();
+            // }
+            //
+            // //导出
+            // $("#btnExport_year").on('click',
+            //     function () {
+            //         var param = {};
+            //         postDownLoadFile({
+            //             url: "127.0.0.1:8080/demo1/dlfile/",
+            //             data: param,
+            //             method: 'post'
+            //         });
+            //     });
+
+            // 渲染表格
+            layer.load(2);
+            treetable.render({
+                treeColIndex: 1,
+                treeSpid: -1,
+                treeIdName: 'authorityId',
+                treePidName: 'parentId',
+                elem: '#munu-table',
+                url: '../api/menus.json',
+                page: false,
+                cols: [[
+                    {type: 'numbers'},
+                    {field: 'authorityName', minWidth: 200, title: '权限名称'},
+                    {field: 'authority', title: '权限标识'},
+                    {field: 'menuUrl', title: '菜单url'},
+                    {field: 'orderNumber', width: 80, align: 'center', title: '排序号'},
+                    {
+                        field: 'isMenu', width: 80, align: 'center', templet: function (d) {
+                            if (d.isMenu == 1) {
+                                return '<span class="layui-badge layui-bg-gray">按钮</span>';
+                            }
+                            if (d.parentId == -1) {
+                                return '<span class="layui-badge layui-bg-blue">目录</span>';
+                            } else {
+                                return '<span class="layui-badge-rim">菜单</span>';
+                            }
+                        }, title: '类型'
+                    },
+                    {templet: '#auth-state', width: 120, align: 'center', title: '操作'}
+                ]],
+                done: function () {
+                    layer.closeAll('loading');
+                }
+            });
+
+            $('#btn-expand').click(function () {
+                treetable.expandAll('#munu-table');
+            });
+
+            $('#btn-fold').click(function () {
+                treetable.foldAll('#munu-table');
+            });
+
+            //监听工具条
+            table.on('tool(munu-table)', function (obj) {
+                var data = obj.data;
+                var layEvent = obj.event;
+
+                if (layEvent === 'del') {
+                    layer.msg('删除' + data.id);
+                } else if (layEvent === 'edit') {
+                    layer.msg('修改' + data.id);
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>
