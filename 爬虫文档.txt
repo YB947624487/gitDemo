@@ -1,0 +1,8 @@
+python3对urllib和urllib2进行了重构，拆分成了urllib.request,urllib.response, urllib.parse, urllib.error等几个子模块，这样的架构从逻辑和结构上说更加合理。urllib库无需安装，python自带。
+python 3.x中urllib库和urilib2库合并成了urllib库。 其中
+urllib2.urlopen()变成了urllib.request.urlopen()
+urllib2.Request()变成了urllib.request.Request()
+python2中的cookielib改为http.cookiejar.
+import http.cookiejar代替 import cookielib
+再次强调：print “hello”；应写为print(“hello”);
+urljoin现在对应的函数是urllib.parse.urljoin
