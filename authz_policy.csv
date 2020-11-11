@@ -1,0 +1,4 @@
+# 供casbin初始化使用，权限都在user后端判断，存入session中 key：enforcer
+
+# 公共权限接口
+p, 路人甲，/users/init/, GET
